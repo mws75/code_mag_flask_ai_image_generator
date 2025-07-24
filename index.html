@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Image Generator (Fast)</title>
+    <script src="http:///code.jquery.com/jquery-3.6.0.min.js" ;></script>
+  </head>
+  <body>
+    <h1>My Image Generator (Fast)</h1>
+    Enter Prompt:
+    <input text="Natural Scenary" id="generation-prompt" />
+    <button id="start-generation">Generate Image</button>
+    <div id="generation-status"></div>
+    <img id="generation-image" src="" />
+    <script>
+      $(document).ready(function () {
+        $("#start-generation").click(function () {
+          // Start the Generation
+          $("#generation-status").text("generating image");
+          $.ajax({
+            type: "POST",
+            url: "/start_genration",
+            contentType: "application/json",
+            data: JSON.stringify({
+              "gneration-prompt": $("#generation-prompt").val(),
+            }),
+            success: function (data) {
+              // Check every 5 seconds
+              let intervalId = setInterval(function () {
+                $.ajax({
+                  type: "GET",
+                  url: "/check_generation",
+                  success: function (data) {
+                    if (data.message === "generation complete") {
+                      // Display the image
+                      $("#generation-image").attr("src", data.image);
+                      clearInterval(intervalId);
+                    } else {
+                      $("#generation-status").text(data.message);
+                    }
+                  },
+                });
+              }, 5000);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
